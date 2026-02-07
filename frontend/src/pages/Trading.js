@@ -219,6 +219,29 @@ export default function Trading() {
             </div>
           </Card>
 
+
+          {/* Performance Overview */}
+          <Card className="border border-[#E4E4E7] shadow-sm rounded-sm">
+            <div className="p-4 border-b border-[#E4E4E7] flex items-center gap-2">
+              <BarChart3 className="w-5 h-5 text-blue-600" />
+              <h3 className="text-lg font-['Manrope'] font-semibold">Performance Overview</h3>
+            </div>
+            <div className="p-4">
+              <PerformanceMetrics metrics={tradingChartData.metrics} />
+            </div>
+          </Card>
+
+          {/* PNL Chart */}
+          <Card className="border border-[#E4E4E7] shadow-sm rounded-sm">
+            <div className="p-4 border-b border-[#E4E4E7]">
+              <h3 className="text-lg font-['Manrope'] font-semibold">PNL Tracking (24h)</h3>
+            </div>
+            <div className="p-4">
+              <PnLChart data={tradingChartData.pnlHistory} />
+            </div>
+          </Card>
+
+
           {/* Open Orders */}
           <Card className="border border-[#E4E4E7] shadow-sm rounded-sm">
             <div className="p-4 border-b border-[#E4E4E7]">
