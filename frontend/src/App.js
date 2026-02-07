@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import io from 'socket.io-client';
 import Dashboard from './pages/Dashboard';
+import { Toaster } from './components/ui/sonner';
 import '@/App.css';
 import '@fontsource/manrope/600.css';
 import '@fontsource/manrope/800.css';
@@ -19,6 +20,7 @@ function App() {
           <Route path="/" element={<Dashboard />} />
         </Routes>
       </BrowserRouter>
+      <Toaster />
     </div>
   );
 }
