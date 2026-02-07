@@ -164,23 +164,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA]" data-testid="dashboard">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-[#E4E4E7]">
-        <div className="px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-black rounded-sm flex items-center justify-center">
-              <Activity className="w-5 h-5 text-white" />
-            </div>
-            <h1 className="text-xl font-['Manrope'] font-extrabold tracking-tight">Polymarket Trading Bot</h1>
-          </div>
-          <div className="flex items-center gap-2 text-xs font-mono text-gray-500">
-            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-            LIVE
-          </div>
-        </div>
-      </header>
-
+    <div data-testid="dashboard">
       {/* Price Ticker */}
       <div className="bg-white border-b-2 border-black" data-testid="price-ticker">
         <div className="max-w-7xl mx-auto px-6 py-8">
