@@ -203,14 +203,6 @@ async def get_wallet_activity(address: str, limit: int = 50):
     activity = await polymarket_service.get_wallet_activity(address, limit)
     return activity
 
-# Include the router in the main app
-app.include_router(api_router)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
-
 # Trading Account Management
 class AccountConnection(BaseModel):
     private_key: str
