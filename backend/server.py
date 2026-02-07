@@ -384,7 +384,7 @@ async def monitor_prices():
 
 @app.on_event("startup")
 async def startup():
-    global binance_service, polymarket_service, signal_service
+    global binance_service, polymarket_service, signal_service, trading_service, wallet_tracking_service
     
     logger.info("Starting services...")
     
@@ -392,6 +392,8 @@ async def startup():
     binance_service = BinanceWebSocketService()
     polymarket_service = PolymarketService()
     signal_service = SignalGeneratorService(binance_service, polymarket_service)
+    trading_service = PolymarketTradingService()
+    wallet_tracking_service = WalletTrackingService()
     
     # Start Binance WebSocket in background
     asyncio.create_task(binance_service.connect())
