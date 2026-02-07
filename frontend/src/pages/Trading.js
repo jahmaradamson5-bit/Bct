@@ -124,24 +124,133 @@ export default function Trading() {
   return (
     <div className="max-w-7xl mx-auto px-6 py-6">
       {!isConnected ? (
-        <Card className="border border-[#E4E4E7] shadow-sm rounded-sm max-w-2xl mx-auto">
-          <div className="p-8 text-center">
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Zap className="w-8 h-8 text-gray-400" />
+        <div className="space-y-4">
+          {/* Connection Prompt */}
+          <Card className="border border-[#E4E4E7] shadow-sm rounded-sm max-w-2xl mx-auto">
+            <div className="p-8 text-center">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Zap className="w-8 h-8 text-gray-400" />
+              </div>
+              <h2 className="text-2xl font-['Manrope'] font-bold mb-2">Connect Your Polymarket Account</h2>
+              <p className="text-gray-600 mb-6">
+                To enable automated trading, you need to connect your Polymarket account.
+                Go to Settings to configure your account credentials.
+              </p>
+              <Button
+                onClick={() => window.location.href = '/settings'}
+                className="bg-black text-white hover:bg-gray-800 rounded-sm px-6 py-3"
+              >
+                Go to Settings
+              </Button>
             </div>
-            <h2 className="text-2xl font-['Manrope'] font-bold mb-2">Connect Your Polymarket Account</h2>
-            <p className="text-gray-600 mb-6">
-              To enable automated trading, you need to connect your Polymarket account.
-              Go to Settings to configure your account credentials.
-            </p>
-            <Button
-              onClick={() => window.location.href = '/settings'}
-              className="bg-black text-white hover:bg-gray-800 rounded-sm px-6 py-3"
-            >
-              Go to Settings
-            </Button>
-          </div>
-        </Card>
+          </Card>
+
+          {/* Preview/Demo Section */}
+          <Card className="border-2 border-blue-500 shadow-lg rounded-sm">
+            <div className="p-6 bg-blue-50 border-b border-blue-200">
+              <div className="flex items-center gap-3 mb-2">
+                <BarChart3 className="w-6 h-6 text-blue-600" />
+                <h2 className="text-xl font-['Manrope'] font-bold">Preview: Auto-Trading Features</h2>
+              </div>
+              <p className="text-sm text-blue-800">
+                This is what you'll see after connecting your account. Connect now to unlock automated trading!
+              </p>
+            </div>
+            
+            <div className="p-6 space-y-6">
+              {/* Demo Auto-Trading Control */}
+              <div className="p-4 bg-gray-50 rounded-sm border-2 border-dashed border-gray-300">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-lg font-['Manrope'] font-bold mb-1">Auto-Trading Toggle</h3>
+                    <p className="text-sm text-gray-600">Enable/disable automated trade execution based on AI signals</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-semibold text-gray-400">Enabled</span>
+                    <Switch disabled className="opacity-50" />
+                  </div>
+                </div>
+                <div className="p-3 bg-green-50 border border-green-200 rounded-sm">
+                  <div className="flex items-center gap-2 text-green-800">
+                    <Play className="w-4 h-4" />
+                    <span className="text-sm font-semibold">When active, bot automatically trades on 70%+ confidence signals</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Demo Performance Metrics */}
+              <div className="p-4 bg-gray-50 rounded-sm border-2 border-dashed border-gray-300">
+                <h3 className="text-sm font-['Manrope'] font-bold mb-3">Performance Overview</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <div className="p-3 bg-white rounded-sm border">
+                    <div className="text-xs text-gray-500 mb-1">Total Value</div>
+                    <div className="text-xl font-bold">$1,245.00</div>
+                  </div>
+                  <div className="p-3 bg-white rounded-sm border">
+                    <div className="text-xs text-gray-500 mb-1">Total PNL</div>
+                    <div className="text-xl font-bold text-green-600">+$156.23</div>
+                  </div>
+                  <div className="p-3 bg-white rounded-sm border">
+                    <div className="text-xs text-gray-500 mb-1">Win Rate</div>
+                    <div className="text-xl font-bold">73.5%</div>
+                  </div>
+                  <div className="p-3 bg-white rounded-sm border">
+                    <div className="text-xs text-gray-500 mb-1">Avg Return</div>
+                    <div className="text-xl font-bold text-green-600">+12.5%</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Demo Positions */}
+              <div className="p-4 bg-gray-50 rounded-sm border-2 border-dashed border-gray-300">
+                <h3 className="text-sm font-['Manrope'] font-bold mb-3">Your Active Positions</h3>
+                <div className="space-y-2">
+                  <div className="p-3 bg-white rounded-sm border flex justify-between items-center">
+                    <div>
+                      <div className="font-semibold text-sm">Bitcoin $100k by March</div>
+                      <div className="text-xs text-gray-500">250 shares @ $0.68</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm font-bold text-green-600">+$24.50</div>
+                      <div className="text-xs text-gray-500">$170.00</div>
+                    </div>
+                  </div>
+                  <div className="p-3 bg-white rounded-sm border flex justify-between items-center">
+                    <div>
+                      <div className="font-semibold text-sm">Ethereum $5k by Q2</div>
+                      <div className="text-xs text-gray-500">180 shares @ $0.55</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm font-bold text-green-600">+$12.40</div>
+                      <div className="text-xs text-gray-500">$99.00</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Demo PNL Chart */}
+              <div className="p-4 bg-gray-50 rounded-sm border-2 border-dashed border-gray-300">
+                <h3 className="text-sm font-['Manrope'] font-bold mb-3">24h PNL Tracking Chart</h3>
+                <div className="h-[200px] bg-white rounded border flex items-center justify-center text-gray-400">
+                  <div className="text-center">
+                    <TrendingUp className="w-12 h-12 mx-auto mb-2 opacity-30" />
+                    <p className="text-sm">Interactive PNL chart will appear here</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="text-center pt-4">
+                <Button
+                  onClick={() => window.location.href = '/settings'}
+                  size="lg"
+                  className="bg-blue-600 text-white hover:bg-blue-700 rounded-sm px-8 py-4 text-base font-semibold"
+                >
+                  Connect Account to Unlock These Features
+                </Button>
+              </div>
+            </div>
+          </Card>
+        </div>
       ) : (
         <div className="space-y-4">
           {/* Auto-Trading Control */}
