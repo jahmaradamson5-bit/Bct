@@ -16,6 +16,8 @@ import json
 from binance_service import BinanceWebSocketService
 from polymarket_service import PolymarketService
 from signal_service import SignalGeneratorService
+from polymarket_trading_service import PolymarketTradingService
+from wallet_tracking_service import WalletTrackingService
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -43,6 +45,8 @@ sio = socketio.AsyncServer(
 binance_service: Optional[BinanceWebSocketService] = None
 polymarket_service: Optional[PolymarketService] = None
 signal_service: Optional[SignalGeneratorService] = None
+trading_service: Optional[PolymarketTradingService] = None
+wallet_tracking_service: Optional[WalletTrackingService] = None
 
 # Define Models
 class Wallet(BaseModel):
