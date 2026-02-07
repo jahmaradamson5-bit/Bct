@@ -82,6 +82,43 @@ export default function Trading() {
     }
     setAutoTradingEnabled(!autoTradingEnabled);
     toast.success(autoTradingEnabled ? 'Auto-trading disabled' : 'Auto-trading enabled');
+
+  // Generate chart data for trading performance
+  const generateTradingChartData = () => {
+    // Simulated PNL history based on trade history
+    const pnlHistory = [];
+    let cumulativePnl = 0;
+    
+    for (let i = 0; i < 24; i++) {
+      const time = new Date(Date.now() - (23 - i) * 3600000);
+      cumulativePnl += Math.random() * 10 - 4;  // Random PNL change
+      pnlHistory.push({
+        time: `${time.getHours()}:00`,
+        pnl: parseFloat(cumulativePnl.toFixed(2))
+      });
+    }
+
+    // Calculate metrics from positions and trades
+    const totalValue = positions.reduce((sum, p) => sum + (p.currentValue || 0), 0);
+    const totalPnl = positions.reduce((sum, p) => sum + (p.pnl || 0), 0);
+    const winningTrades = tradeHistory.filter(t => t.pnl && t.pnl > 0).length;
+    const totalTrades = tradeHistory.length;
+    
+    const metrics = {
+      totalValue,
+      totalPnl,
+      winRate: totalTrades > 0 ? (winningTrades / totalTrades) * 100 : 0,
+      avgReturn: totalValue > 0 ? (totalPnl / totalValue) * 100 : 0,
+      totalTrades,
+      bestTrade: Math.max(...tradeHistory.map(t => t.pnl || 0), 0),
+      worstTrade: Math.min(...tradeHistory.map(t => t.pnl || 0), 0)
+    };
+
+    return { pnlHistory, metrics };
+  };
+
+  const tradingChartData = isConnected ? generateTradingChartData() : { pnlHistory: [], metrics: {} };
+
   };
 
   return (
