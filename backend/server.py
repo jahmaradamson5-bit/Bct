@@ -326,6 +326,13 @@ async def get_wallet_activity_feed(address: str, limit: int = 50):
     
     return await wallet_tracking_service.get_wallet_activity_feed(address, limit)
 
+# Include the router in the main app
+app.include_router(api_router)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_credentials=True,
+    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
     allow_methods=["*"],
     allow_headers=["*"],
 )
