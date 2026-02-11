@@ -240,7 +240,36 @@ export default function Dashboard() {
                     <p className="text-sm">No signals yet. Generate your first signal.</p>
                   </div>
                 ) : (
-                priceDelta > 0 ? '+' : ''}{(priceDelta || 0).toFixed(2)}
+          <div key={signal.id} className="mb-4">
+            {/* 1. Logic is now wrapped in a div so it doesn't crash the build */}
+            <div className="text-xs font-medium text-gray-500 mb-1">
+              {priceDelta > 0 ? '+' : ''}{(priceDelta || 0).toFixed(2)}
+            </div>
+
+            {/* 2. Your original Signal Card */}
+            <div 
+              className="bg-blue-50/50 border-l-4 border-blue-600 p-4 rounded-sm hover:bg-blue-50 transition-colors"
+              data-testid={signal-card-${signal.id}}
+            >
+              <div className="flex items-start justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  {signal.signal_type === 'BUY' ? (
+                    <TrendingUp className="w-5 h-5 text-green-600" />
+                  ) : (
+                    <TrendingDown className="w-5 h-5 text-red-600" />
+                  )}
+                  <span className={text-lg font-bold ${
+                    signal.signal_type === 'BUY' ? 'text-green-600' : 'text-red-600'
+                  }}>
+                    {signal.signal_type}
+                  </span>
+                </div>
+              </div>
+              {/* Ensure any other inner content of your card stays here */}
+            </div>
+          </div>
+        )}
+              
                     <div
                       key={signal.id}
                       className="bg-blue-50/50 border-l-4 border-blue-600 p-4 rounded-sm hover:bg-blue-50 transition-colors"
