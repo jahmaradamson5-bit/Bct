@@ -11,7 +11,9 @@ import PositionDistribution from '../components/charts/PositionDistribution';
 import BuySellComparison from '../components/charts/BuySellComparison';
 import PerformanceMetrics from '../components/charts/PerformanceMetrics';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || '';
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL && process.env.REACT_APP_BACKEND_URL !== 'undefined'
+  ? process.env.REACT_APP_BACKEND_URL.replace(/\/+$/, '')
+  : '';
 const API = `${BACKEND_URL}/api`;
 
 export default function WalletTracker() {
