@@ -241,7 +241,7 @@ export default function Dashboard() {
   </div>
 ) : (
   signals.map((signal) => {
-      const priceDelta = (signal.current_price  0) - (signal.entry_price  0);
+      const priceDelta = (signal.current_price  l l  0) - (signal.entry_price   l l  0);
       return (
         <div key={signal.id} className="mb-4">
           {/* 1. Price logic container */}
@@ -266,10 +266,14 @@ export default function Dashboard() {
                 {new Date(signal.timestamp).toLocaleTimeString()}
               </span>
             </div>
-            {/* Additional signal details go here */}
-          </div>
-        </div>
-      );
+       );
+     })
+   )}
+ </div>
+            
+          
+        
+      
     })
   )}
 </div>
