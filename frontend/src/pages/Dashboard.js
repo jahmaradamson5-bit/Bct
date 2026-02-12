@@ -234,36 +234,92 @@ export default function Dashboard() {
                 </Button>
               </div>
               <div className="p-4 space-y-3 max-h-[500px] overflow-y-auto" data-testid="signals-list">
-                {signals.length === 0 ? (
-                  <div className="text-center py-12 text-gray-400">
-                    <Brain className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                    <p className="text-sm">No signals yet. Generate your first signal.</p>
-                  </div>
-            ) : (
+              {signals.length === 0 ? (
+  <div className="text-center py-12 text-gray-400">
+    <Brain className="w-12 h-12 mx-auto mb-3 opacity-30" />
+    <p className="text-sm">No signals yet. Generate your first signal.</p>
+  </div>
 ) : (
-          <div key={signal.id} className="mb-4">
-            {/* 1. Price logic container */}
-            <div className="text-xs font-medium text-gray-500 mb-1">
-              {priceDelta > 0 ? '+' : ''}{(priceDelta || 0).toFixed(2)}
-            </div>
+  signals.map((signal) => {
+      const priceDelta = (signal.current_price  0) - (signal.entry_price  0);
+      return (
+        <div key={signal.id} className="mb-4">
+          {/* 1. Price logic container */}
+          <div className="text-xs font-medium text-gray-500 mb-1">
+            {priceDelta > 0 ? '+' : ''}{priceDelta.toFixed(2)}
+          </div>
 
-            {/* 2. Main Signal Card */}
-            <div 
-              className="bg-blue-50/50 border-l-4 border-blue-600 p-4 rounded-sm hover:bg-blue-50 transition-colors"
-              data-testid={signal-card-${signal.id}}
-            >
-              <div className="flex items-start justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  {signal.signal_type === 'BUY' ? (
-                    <TrendingUp className="w-5 h-5 text-green-600" />
-                  ) : (
-                    <TrendingDown className="w-5 h-5 text-red-600" />
-                  )}
-                  <span className={text-lg font-bold ${
-                    signal.signal_type === 'BUY' ? 'text-green-600' : 'text-red-600'
-                  }}>
-                    {signal.signal_type}
-                  </span>
+          {/* 2. Main Signal Card */}
+          <div className="bg-blue-50/50 border-l-4 border-blue-600 p-4 rounded-sm hover:bg-blue-50 transition-colors">
+            <div className="flex items-start justify-between mb-2">
+              <div className="flex items-center gap-2">
+                {signal.signal_type === 'BUY' ? (
+                  <TrendingUp className="w-5 h-5 text-green-600" />
+                ) : (
+                  <TrendingDown className="w-5 h-5 text-red-600" />
+                )}
+                <span className={font-bold ${signal.signal_type === 'BUY' ? 'text-green-700' : 'text-red-700'}}>
+                  {signal.signal_type}
+                </span>
+              </div>
+              <span className="text-xs text-gray-500 text-right">
+                {new Date(signal.timestamp).toLocaleTimeString()}
+              </span>
+            </div>
+            {/* Additional signal details go here */}
+          </div>
+        </div>
+      );
+    })
+  )}
+</div>
+       
+         
+      
+        
+     
+
+      
+      
+        
+           
+            
+              
+            
+              
+            
+            
+              
+           
+          
+                  
+                    
+                    
+                  
+                 
+     
+       
+            
+              
+            
+
+            
+           
+              
+              
+            
+              
+                
+                  
+                    
+                
+                    
+                 
+                  
+                    
+                  
+                    
+                  
                 </div>
               </div>
               
