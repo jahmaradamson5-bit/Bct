@@ -1,12 +1,8 @@
 import React from 'react';
 import { TrendingUp, TrendingDown, DollarSign, Target } from 'lucide-react';
 
- dashboard-page-crash
-export default function PerformanceMetrics({ metrics = {} }) {
-
 export default function PerformanceMetrics({ metrics }) {
   const safeMetrics = metrics && typeof metrics === 'object' ? metrics : {};
- main
   const { 
     totalValue = 0, 
     totalPnl = 0, 
@@ -15,11 +11,7 @@ export default function PerformanceMetrics({ metrics }) {
     totalTrades = 0,
     bestTrade = 0,
     worstTrade = 0
- dashboard-page-crash
-  } = metrics || {};
-
   } = safeMetrics;
- main
 
   const metricsData = [
     {

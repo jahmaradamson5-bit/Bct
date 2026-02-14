@@ -23,23 +23,6 @@ export default function Trading() {
   const [openOrders, setOpenOrders] = useState([]);
   const [tradeHistory, setTradeHistory] = useState([]);
 
-  useEffect(() => {
-    checkTradingStatus();
-  }, [checkTradingStatus]);
-
-  useEffect(() => {
-    if (isConnected) {
-      fetchPositions();
-      fetchOpenOrders();
-      fetchTradeHistory();
-      const interval = setInterval(() => {
-        fetchPositions();
-        fetchOpenOrders();
-      }, 10000);
-      return () => clearInterval(interval);
-    }
-  }, [isConnected, fetchPositions, fetchOpenOrders, fetchTradeHistory]);
-
   const checkTradingStatus = useCallback(async () => {
     try {
       const response = await axios.get(`${API}/trading/status`);
@@ -77,6 +60,23 @@ export default function Trading() {
     }
   }, []);
 
+  useEffect(() => {
+    checkTradingStatus();
+  }, [checkTradingStatus]);
+
+  useEffect(() => {
+    if (isConnected) {
+      fetchPositions();
+      fetchOpenOrders();
+      fetchTradeHistory();
+      const interval = setInterval(() => {
+        fetchPositions();
+        fetchOpenOrders();
+      }, 10000);
+      return () => clearInterval(interval);
+    }
+  }, [isConnected, fetchPositions, fetchOpenOrders, fetchTradeHistory]);
+
   const toggleAutoTrading = () => {
     if (!isConnected) {
       toast.error('Please connect your Polymarket account first');
@@ -86,15 +86,18 @@ export default function Trading() {
     toast.success(autoTradingEnabled ? 'Auto-trading disabled' : 'Auto-trading enabled');
   };
 
-  // Generate chart data for trading performance
+  // Generate chart data for trading performance -- lives at component scope
   const generateTradingChartData = () => {
+    const safePositions = Array.isArray(positions) ? positions : [];
+    const safeHistory = Array.isArray(tradeHistory) ? tradeHistory : [];
+
     // Simulated PNL history based on trade history
     const pnlHistory = [];
     let cumulativePnl = 0;
-    
+
     for (let i = 0; i < 24; i++) {
       const time = new Date(Date.now() - (23 - i) * 3600000);
-      cumulativePnl += Math.random() * 10 - 4;  // Random PNL change
+      cumulativePnl += Math.random() * 10 - 4;
       pnlHistory.push({
         time: `${time.getHours()}:00`,
         pnl: parseFloat(cumulativePnl.toFixed(2))
@@ -102,31 +105,26 @@ export default function Trading() {
     }
 
     // Calculate metrics from positions and trades
-    const totalValue = (positions || []).reduce((sum, p) => sum + (p.currentValue || 0), 0);
-    const totalPnl = (positions || []).reduce((sum, p) => sum + (p.pnl || 0), 0);
-    const history = tradeHistory || [];
-    const winningTrades = history.filter(t => t.pnl && t.pnl > 0).length;
-    const totalTrades = history.length;
-    
+    const totalValue = safePositions.reduce((sum, p) => sum + (p.currentValue || 0), 0);
+    const totalPnl = safePositions.reduce((sum, p) => sum + (p.pnl || 0), 0);
+    const winningTrades = safeHistory.filter(t => t.pnl && t.pnl > 0).length;
+    const totalTrades = safeHistory.length;
+
     const metrics = {
       totalValue,
       totalPnl,
       winRate: totalTrades > 0 ? (winningTrades / totalTrades) * 100 : 0,
       avgReturn: totalValue > 0 ? (totalPnl / totalValue) * 100 : 0,
       totalTrades,
-      bestTrade: Math.max(...history.map(t => t.pnl || 0), 0),
-      worstTrade: Math.min(...history.map(t => t.pnl || 0), 0)
+      bestTrade: safeHistory.length > 0 ? Math.max(...safeHistory.map(t => t.pnl || 0), 0) : 0,
+      worstTrade: safeHistory.length > 0 ? Math.min(...safeHistory.map(t => t.pnl || 0), 0) : 0
     };
 
     return { pnlHistory, metrics };
   };
 
- dashboard-page-crash
   const defaultMetrics = { totalValue: 0, totalPnl: 0, winRate: 0, avgReturn: 0, totalTrades: 0, bestTrade: 0, worstTrade: 0 };
   const tradingChartData = isConnected ? generateTradingChartData() : { pnlHistory: [], metrics: defaultMetrics };
-
-  const tradingChartData = isConnected ? generateTradingChartData() : { pnlHistory: [], metrics: {} };
- main
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-6">
@@ -305,7 +303,7 @@ export default function Trading() {
               <h3 className="text-lg font-['Manrope'] font-semibold">Your Positions</h3>
             </div>
             <div className="p-4">
-              {positions.length === 0 ? (
+              {!Array.isArray(positions) || positions.length === 0 ? (
                 <div className="text-center py-8 text-gray-400">
                   <DollarSign className="w-12 h-12 mx-auto mb-2 opacity-30" />
                   <p className="text-sm">No active positions</p>
@@ -322,10 +320,10 @@ export default function Trading() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className={`text-sm font-bold ${position.pnl >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                            {position.pnl >= 0 ? '+' : ''}${position.pnl}
+                          <div className={`text-sm font-bold ${(position.pnl ?? 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {(position.pnl ?? 0) >= 0 ? '+' : ''}${position.pnl ?? 0}
                           </div>
-                          <div className="text-xs text-gray-500">${position.currentValue}</div>
+                          <div className="text-xs text-gray-500">${position.currentValue ?? 0}</div>
                         </div>
                       </div>
                     </div>
@@ -334,7 +332,6 @@ export default function Trading() {
               )}
             </div>
           </Card>
-
 
           {/* Performance Overview */}
           <Card className="border border-[#E4E4E7] shadow-sm rounded-sm">
@@ -357,14 +354,13 @@ export default function Trading() {
             </div>
           </Card>
 
-
           {/* Open Orders */}
           <Card className="border border-[#E4E4E7] shadow-sm rounded-sm">
             <div className="p-4 border-b border-[#E4E4E7]">
               <h3 className="text-lg font-['Manrope'] font-semibold">Open Orders</h3>
             </div>
             <div className="p-4">
-              {openOrders.length === 0 ? (
+              {!Array.isArray(openOrders) || openOrders.length === 0 ? (
                 <div className="text-center py-8 text-gray-400">
                   <p className="text-sm">No open orders</p>
                 </div>
@@ -398,7 +394,7 @@ export default function Trading() {
               <h3 className="text-lg font-['Manrope'] font-semibold">Recent Trades</h3>
             </div>
             <div className="p-4 max-h-[300px] overflow-y-auto">
-              {tradeHistory.length === 0 ? (
+              {!Array.isArray(tradeHistory) || tradeHistory.length === 0 ? (
                 <div className="text-center py-8 text-gray-400">
                   <p className="text-sm">No trade history</p>
                 </div>
@@ -418,7 +414,7 @@ export default function Trading() {
                         </div>
                       </div>
                       <div className="text-xs text-gray-400 font-mono">
-                        {new Date(trade.timestamp).toLocaleString()}
+                        {trade.timestamp ? new Date(trade.timestamp).toLocaleString() : '--'}
                       </div>
                     </div>
                   ))}

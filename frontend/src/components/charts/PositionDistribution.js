@@ -16,18 +16,6 @@ const CustomTooltip = ({ active, payload }) => {
   return null;
 };
 
- dashboard-page-crash
-export default function PositionDistribution({ data = [] }) {
-  if (!Array.isArray(data) || data.length === 0) {
-    return (
-      <div className="w-full h-[300px] flex items-center justify-center text-gray-400 text-sm">
-        No distribution data available
-      </div>
-    );
-  }
-  const total = data.reduce((sum, item) => sum + item.value, 0);
-  const dataWithTotal = data.map(item => ({ ...item, total }));
-
 export default function PositionDistribution({ data }) {
   const safeData = Array.isArray(data) ? data : [];
 
@@ -41,7 +29,6 @@ export default function PositionDistribution({ data }) {
 
   const total = safeData.reduce((sum, item) => sum + (item.value || 0), 0);
   const dataWithTotal = safeData.map(item => ({ ...item, total }));
- main
 
   return (
     <div className="w-full h-[300px]">
