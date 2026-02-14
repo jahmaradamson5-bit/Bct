@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
 import io from 'socket.io-client';
 import { Activity, Zap, Wallet, ArrowUpRight, ArrowDownRight, Brain, Plus, Trash2, TrendingUp, TrendingDown } from 'lucide-react';
@@ -7,7 +7,9 @@ import { Input } from '../components/ui/input';
 import { Card } from '../components/ui/card';
 import { toast } from 'sonner';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL && process.env.REACT_APP_BACKEND_URL !== 'undefined'
+  ? process.env.REACT_APP_BACKEND_URL.replace(/\/+$/, '')
+  : '';
 const API = `${BACKEND_URL}/api`;
 const SOCKET_PATH = '/api/socket.io';
 
@@ -55,8 +57,14 @@ export default function Dashboard() {
     });
 
     socketRef.current.on('new_signal', (signal) => {
+ dashboard-page-crash
       setSignals(prev => [signal, ...(Array.isArray(prev) ? prev : [])].slice(0, 20));
-      toast.success('New trading signal generated!');
+      toast.success('New trading signal generated!')
+      if (signal && typeof signal === 'object') {
+        setSignals(prev => [signal, ...(Array.isArray(prev) ? prev : [])].slice(0, 20));
+        toast.success('New trading signal generated!');
+      }
+ main
     });
 
     return () => {
@@ -71,36 +79,56 @@ export default function Dashboard() {
     fetchCurrentPrices();
     fetchWallets();
     fetchSignals();
-  }, []);
+  }, [fetchCurrentPrices, fetchWallets, fetchSignals]);
 
-  const fetchCurrentPrices = async () => {
+  const toSafeArray = (data) => {
+    if (Array.isArray(data)) return data;
+    if (data && typeof data === 'object') {
+      const nested = data.wallets || data.signals || data.data || data.results;
+      if (Array.isArray(nested)) return nested;
+    }
+    return [];
+  };
+
+  const fetchCurrentPrices = useCallback(async () => {
     try {
       const response = await axios.get(`${API}/prices/current`);
-      setBinancePrice(response.data.binance_price);
-      setPolymarketPrice(response.data.polymarket_price);
-      setPriceDelta(response.data.price_delta);
+      const data = response.data || {};
+      setBinancePrice(data.binance_price ?? null);
+      setPolymarketPrice(data.polymarket_price ?? null);
+      setPriceDelta(data.price_delta ?? 0);
     } catch (error) {
       console.error('Error fetching prices:', error);
     }
-  };
+  }, []);
 
-  const fetchWallets = async () => {
+  const fetchWallets = useCallback(async () => {
     try {
       const response = await axios.get(`${API}/wallets`);
+ dashboard-page-crash
       setWallets(Array.isArray(response.data) ? response.data : []);
+
+      setWallets(toSafeArray(response.data));
+ main
     } catch (error) {
       console.error('Error fetching wallets:', error);
+      setWallets([]);
     }
-  };
+  }, []);
 
-  const fetchSignals = async () => {
+  const fetchSignals = useCallback(async () => {
     try {
       const response = await axios.get(`${API}/signals`);
+ dashboard-page-crash
       setSignals(Array.isArray(response.data) ? response.data : []);
+
+      setSignals(toSafeArray(response.data));
+ main
     } catch (error) {
       console.error('Error fetching signals:', error);
+      setSignals([]);
     }
-  };
+  }, []);
 
   const addWallet = async () => {
     if (!newWalletAddress || !newWalletLabel) {
@@ -156,10 +184,15 @@ export default function Dashboard() {
     setSelectedWallet(wallet);
     try {
       const response = await axios.get(`${API}/wallets/${wallet.address}/positions`);
-      setWalletPositions(response.data);
+      const data = response.data || {};
+      setWalletPositions({
+        ...data,
+        positions: Array.isArray(data.positions) ? data.positions : [],
+      });
     } catch (error) {
       console.error('Error fetching wallet positions:', error);
       toast.error('Failed to load wallet positions');
+      setWalletPositions(null);
     }
   };
 
@@ -234,7 +267,7 @@ export default function Dashboard() {
                 </Button>
               </div>
               <div className="p-4 space-y-3 max-h-[500px] overflow-y-auto" data-testid="signals-list">
-                {signals.length === 0 ? (
+                {!Array.isArray(signals) || signals.length === 0 ? (
                   <div className="text-center py-12 text-gray-400">
                     <Brain className="w-12 h-12 mx-auto mb-3 opacity-30" />
                     <p className="text-sm">No signals yet. Generate your first signal.</p>
@@ -262,7 +295,11 @@ export default function Dashboard() {
                         <div className="text-right">
                           <div className="text-xs text-gray-400 font-mono">CONFIDENCE</div>
                           <div className="text-sm font-bold font-['JetBrains_Mono']">
+ dashboard-page-crash
                             {((signal.confidence ?? 0) * 100).toFixed(0)}%
+
+                            {signal.confidence != null ? (signal.confidence * 100).toFixed(0) : '--'}%
+ main
                           </div>
                         </div>
                       </div>
@@ -270,15 +307,15 @@ export default function Dashboard() {
                       <div className="grid grid-cols-3 gap-2 text-xs font-mono text-gray-500">
                         <div>
                           <span className="text-[10px] uppercase tracking-wider text-gray-400">Binance</span>
-                          <div className="font-semibold">${signal.binance_price?.toFixed(2)}</div>
+                          <div className="font-semibold">${signal.binance_price != null ? signal.binance_price.toFixed(2) : '---'}</div>
                         </div>
                         <div>
                           <span className="text-[10px] uppercase tracking-wider text-gray-400">Polymarket</span>
-                          <div className="font-semibold">{signal.polymarket_price?.toFixed(4)}</div>
+                          <div className="font-semibold">{signal.polymarket_price != null ? signal.polymarket_price.toFixed(4) : '---'}</div>
                         </div>
                         <div>
                           <span className="text-[10px] uppercase tracking-wider text-gray-400">Delta</span>
-                          <div className="font-semibold">{signal.price_delta?.toFixed(2)}</div>
+                          <div className="font-semibold">{signal.price_delta != null ? signal.price_delta.toFixed(2) : '---'}</div>
                         </div>
                       </div>
                     </div>
@@ -324,7 +361,7 @@ export default function Dashboard() {
 
                 {/* Wallet List */}
                 <div className="space-y-2 max-h-[400px] overflow-y-auto" data-testid="wallet-list">
-                  {wallets.length === 0 ? (
+                  {!Array.isArray(wallets) || wallets.length === 0 ? (
                     <div className="text-center py-8 text-gray-400">
                       <Wallet className="w-10 h-10 mx-auto mb-2 opacity-30" />
                       <p className="text-xs">No wallets tracked yet</p>
@@ -371,27 +408,30 @@ export default function Dashboard() {
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
                         <span>Total Value:</span>
-                        <span className="font-mono font-bold">${walletPositions.total_value?.toFixed(2)}</span>
+                        <span className="font-mono font-bold">${(walletPositions.total_value ?? 0).toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between text-sm">
                         <span>Total PNL:</span>
                         <span className={`font-mono font-bold ${
-                          walletPositions.total_pnl >= 0 ? 'text-green-600' : 'text-red-600'
+                          (walletPositions.total_pnl ?? 0) >= 0 ? 'text-green-600' : 'text-red-600'
                         }`}>
-                          {walletPositions.total_pnl >= 0 ? '+' : ''}{walletPositions.total_pnl?.toFixed(2)}
+                          {(walletPositions.total_pnl ?? 0) >= 0 ? '+' : ''}{(walletPositions.total_pnl ?? 0).toFixed(2)}
                         </span>
                       </div>
-                      {walletPositions.positions?.map((pos, idx) => (
-                        <div key={idx} className="text-xs border-t border-gray-200 pt-2 mt-2">
-                          <div className="font-semibold">{pos.market}</div>
-                          <div className="flex justify-between mt-1 text-gray-600">
-                            <span>{pos.shares} shares @ {pos.avg_price}</span>
-                            <span className={pos.pnl >= 0 ? 'text-green-600' : 'text-red-600'}>
-                              {pos.pnl >= 0 ? '+' : ''}{pos.pnl_percent?.toFixed(2)}%
-                            </span>
+                      {(Array.isArray(walletPositions.positions) ? walletPositions.positions : []).map((pos, idx) => {
+                        if (!pos || typeof pos !== 'object') return null;
+                        return (
+                          <div key={idx} className="text-xs border-t border-gray-200 pt-2 mt-2">
+                            <div className="font-semibold">{pos.market ?? 'Unknown'}</div>
+                            <div className="flex justify-between mt-1 text-gray-600">
+                              <span>{pos.shares ?? 0} shares @ {pos.avg_price ?? '—'}</span>
+                              <span className={(pos.pnl ?? 0) >= 0 ? 'text-green-600' : 'text-red-600'}>
+                                {(pos.pnl ?? 0) >= 0 ? '+' : ''}{(pos.pnl_percent ?? 0).toFixed(2)}%
+                              </span>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 )}
