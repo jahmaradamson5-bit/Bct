@@ -55,7 +55,7 @@ export default function Dashboard() {
     });
 
     socketRef.current.on('new_signal', (signal) => {
-      setSignals(prev => [signal, ...prev].slice(0, 20));
+      setSignals(prev => [signal, ...(Array.isArray(prev) ? prev : [])].slice(0, 20));
       toast.success('New trading signal generated!');
     });
 
@@ -87,7 +87,7 @@ export default function Dashboard() {
   const fetchWallets = async () => {
     try {
       const response = await axios.get(`${API}/wallets`);
-      setWallets(response.data);
+      setWallets(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error('Error fetching wallets:', error);
     }
@@ -96,7 +96,7 @@ export default function Dashboard() {
   const fetchSignals = async () => {
     try {
       const response = await axios.get(`${API}/signals`);
-      setSignals(response.data);
+      setSignals(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error('Error fetching signals:', error);
     }
@@ -262,7 +262,7 @@ export default function Dashboard() {
                         <div className="text-right">
                           <div className="text-xs text-gray-400 font-mono">CONFIDENCE</div>
                           <div className="text-sm font-bold font-['JetBrains_Mono']">
-                            {(signal.confidence * 100).toFixed(0)}%
+                            {((signal.confidence ?? 0) * 100).toFixed(0)}%
                           </div>
                         </div>
                       </div>

@@ -15,7 +15,14 @@ const CustomTooltip = ({ active, payload }) => {
   return null;
 };
 
-export default function PnLChart({ data }) {
+export default function PnLChart({ data = [] }) {
+  if (!Array.isArray(data) || data.length === 0) {
+    return (
+      <div className="w-full h-[300px] flex items-center justify-center text-gray-400 text-sm">
+        No PNL data available
+      </div>
+    );
+  }
   return (
     <div className="w-full h-[300px]">
       <ResponsiveContainer width="100%" height="100%">

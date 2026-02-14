@@ -102,7 +102,7 @@ export default function WalletTracker() {
   const fetchWallets = async () => {
     try {
       const response = await axios.get(`${API}/wallets`);
-      setWallets(response.data);
+      setWallets(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error('Error fetching wallets:', error);
     }
@@ -155,7 +155,7 @@ export default function WalletTracker() {
       ]);
       
       setWalletDetails(detailsRes.data);
-      setActivityFeed(activityRes.data);
+      setActivityFeed(Array.isArray(activityRes.data) ? activityRes.data : []);
     } catch (error) {
       console.error('Error fetching wallet details:', error);
       toast.error('Failed to load wallet details');
