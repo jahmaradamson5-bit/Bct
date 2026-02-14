@@ -13,6 +13,16 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL && process.env.REACT_APP_B
 const API = `${BACKEND_URL}/api`;
 const SOCKET_PATH = '/api/socket.io';
 
+/** Safely coerce any API response into an array. */
+const toSafeArray = (data) => {
+  if (Array.isArray(data)) return data;
+  if (data && typeof data === 'object') {
+    const nested = data.wallets || data.signals || data.data || data.results;
+    if (Array.isArray(nested)) return nested;
+  }
+  return [];
+};
+
 export default function Dashboard() {
   const [binancePrice, setBinancePrice] = useState(null);
   const [polymarketPrice, setPolymarketPrice] = useState(null);
@@ -57,14 +67,10 @@ export default function Dashboard() {
     });
 
     socketRef.current.on('new_signal', (signal) => {
- dashboard-page-crash
-      setSignals(prev => [signal, ...(Array.isArray(prev) ? prev : [])].slice(0, 20));
-      toast.success('New trading signal generated!')
       if (signal && typeof signal === 'object') {
         setSignals(prev => [signal, ...(Array.isArray(prev) ? prev : [])].slice(0, 20));
         toast.success('New trading signal generated!');
       }
- main
     });
 
     return () => {
@@ -73,22 +79,6 @@ export default function Dashboard() {
       }
     };
   }, [binancePrice, prevBinancePrice]);
-
-  // Fetch initial data
-  useEffect(() => {
-    fetchCurrentPrices();
-    fetchWallets();
-    fetchSignals();
-  }, [fetchCurrentPrices, fetchWallets, fetchSignals]);
-
-  const toSafeArray = (data) => {
-    if (Array.isArray(data)) return data;
-    if (data && typeof data === 'object') {
-      const nested = data.wallets || data.signals || data.data || data.results;
-      if (Array.isArray(nested)) return nested;
-    }
-    return [];
-  };
 
   const fetchCurrentPrices = useCallback(async () => {
     try {
@@ -105,11 +95,7 @@ export default function Dashboard() {
   const fetchWallets = useCallback(async () => {
     try {
       const response = await axios.get(`${API}/wallets`);
- dashboard-page-crash
-      setWallets(Array.isArray(response.data) ? response.data : []);
-
       setWallets(toSafeArray(response.data));
- main
     } catch (error) {
       console.error('Error fetching wallets:', error);
       setWallets([]);
@@ -119,16 +105,19 @@ export default function Dashboard() {
   const fetchSignals = useCallback(async () => {
     try {
       const response = await axios.get(`${API}/signals`);
- dashboard-page-crash
-      setSignals(Array.isArray(response.data) ? response.data : []);
-
       setSignals(toSafeArray(response.data));
- main
     } catch (error) {
       console.error('Error fetching signals:', error);
       setSignals([]);
     }
   }, []);
+
+  // Fetch initial data
+  useEffect(() => {
+    fetchCurrentPrices();
+    fetchWallets();
+    fetchSignals();
+  }, [fetchCurrentPrices, fetchWallets, fetchSignals]);
 
   const addWallet = async () => {
     if (!newWalletAddress || !newWalletLabel) {
@@ -295,11 +284,7 @@ export default function Dashboard() {
                         <div className="text-right">
                           <div className="text-xs text-gray-400 font-mono">CONFIDENCE</div>
                           <div className="text-sm font-bold font-['JetBrains_Mono']">
- dashboard-page-crash
-                            {((signal.confidence ?? 0) * 100).toFixed(0)}%
-
                             {signal.confidence != null ? (signal.confidence * 100).toFixed(0) : '--'}%
- main
                           </div>
                         </div>
                       </div>

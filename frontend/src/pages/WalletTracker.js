@@ -16,6 +16,16 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL && process.env.REACT_APP_B
   : '';
 const API = `${BACKEND_URL}/api`;
 
+/** Safely coerce any API response into an array. */
+const toSafeArray = (data) => {
+  if (Array.isArray(data)) return data;
+  if (data && typeof data === 'object') {
+    const nested = data.wallets || data.data || data.results;
+    if (Array.isArray(nested)) return nested;
+  }
+  return [];
+};
+
 export default function WalletTracker() {
   const [wallets, setWallets] = useState([]);
   const [selectedWallet, setSelectedWallet] = useState(null);
@@ -24,7 +34,6 @@ export default function WalletTracker() {
   const [newWalletAddress, setNewWalletAddress] = useState('');
   const [newWalletLabel, setNewWalletLabel] = useState('');
   const [loading, setLoading] = useState(false);
-
 
   // Generate chart data from wallet details
   const generateChartData = () => {
@@ -102,16 +111,8 @@ export default function WalletTracker() {
 
   const fetchWallets = useCallback(async () => {
     try {
-      const response = await axios.get(`${API}/wallets`); dashboard-page-crash
-      setWallets(Array.isArray(response.data) ? response.data : []
-      const data = response.data;
-      const safe = Array.isArray(data)
-        ? data
-        : data && typeof data === 'object'
-          ? (data.wallets || data.data || data.results || [])
-          : [];
-      setWallets(Array.isArray(safe) ? safe : []);
- main
+      const response = await axios.get(`${API}/wallets`);
+      setWallets(toSafeArray(response.data));
     } catch (error) {
       console.error('Error fetching wallets:', error);
       setWallets([]);
@@ -168,12 +169,8 @@ export default function WalletTracker() {
         axios.get(`${API}/wallets/${wallet.address}/activity-feed`)
       ]);
       
- dashboard-page-crash
-      setWalletDetails(detailsRes.data);
-      setActivityFeed(Array.isArray(activityRes.data) ? activityRes.data : []);
-
       setWalletDetails(detailsRes.data || null);
-      setActivityFeed(toSafeArray(activityRes.data)); main
+      setActivityFeed(toSafeArray(activityRes.data));
     } catch (error) {
       console.error('Error fetching wallet details:', error);
       toast.error('Failed to load wallet details');
@@ -346,7 +343,7 @@ export default function WalletTracker() {
                     <h3 className="text-sm font-['Manrope'] font-semibold">Position Distribution</h3>
                   </div>
                   <div className="p-4">
-                    {chartData.distribution.length > 0 ? (
+                    {Array.isArray(chartData.distribution) && chartData.distribution.length > 0 ? (
                       <PositionDistribution data={chartData.distribution} />
                     ) : (
                       <div className="h-[300px] flex items-center justify-center text-gray-400 text-sm">
@@ -363,7 +360,7 @@ export default function WalletTracker() {
                   <h3 className="text-sm font-['Manrope'] font-semibold">Buy vs Sell by Market Type</h3>
                 </div>
                 <div className="p-4">
-                  {chartData.buySell.length > 0 ? (
+                  {Array.isArray(chartData.buySell) && chartData.buySell.length > 0 ? (
                     <BuySellComparison data={chartData.buySell} />
                   ) : (
                     <div className="h-[300px] flex items-center justify-center text-gray-400 text-sm">
@@ -373,7 +370,6 @@ export default function WalletTracker() {
                 </div>
               </Card>
 
-
               {/* Positions Tabs */}
               <Card className="border border-[#E4E4E7] shadow-sm rounded-sm">
                 <Tabs defaultValue="buying" className="w-full">
@@ -381,11 +377,11 @@ export default function WalletTracker() {
                     <TabsList className="grid w-full grid-cols-2 bg-gray-100 rounded-sm">
                       <TabsTrigger value="buying" className="data-[state=active]:bg-white rounded-sm">
                         <TrendingUp className="w-4 h-4 mr-2 text-green-600" />
-                        Buying Positions ({walletDetails.buying_positions?.length || 0})
+                        Buying Positions ({Array.isArray(walletDetails.buying_positions) ? walletDetails.buying_positions.length : 0})
                       </TabsTrigger>
                       <TabsTrigger value="selling" className="data-[state=active]:bg-white rounded-sm">
                         <TrendingDown className="w-4 h-4 mr-2 text-red-600" />
-                        Selling Positions ({walletDetails.selling_positions?.length || 0})
+                        Selling Positions ({Array.isArray(walletDetails.selling_positions) ? walletDetails.selling_positions.length : 0})
                       </TabsTrigger>
                     </TabsList>
                   </div>
@@ -472,7 +468,6 @@ export default function WalletTracker() {
                   <h3 className="text-lg font-['Manrope'] font-semibold">Recent Activity</h3>
                 </div>
                 <div className="p-4 space-y-2 max-h-[300px] overflow-y-auto">
- dashboard-page-crash
                   {!Array.isArray(activityFeed) || activityFeed.length === 0 ? (
                     <div className="text-center py-8 text-gray-400">
                       <p className="text-sm">No recent activity</p>
@@ -491,35 +486,14 @@ export default function WalletTracker() {
                             <div className="text-xs text-gray-500">
                               {activity.action} {activity.shares} shares @ {activity.price}
                             </div>
-                  {(Array.isArray(activityFeed) ? activityFeed : []).map((activity, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-2 border-b border-gray-100 last:border-0">
-                      <div className="flex items-center gap-3">
-                        {activity.action === 'BUY' ? (
-                          <TrendingUp className="w-4 h-4 text-green-600" />
-                        ) : (
-                          <TrendingDown className="w-4 h-4 text-red-600" />
-                        )}
-                        <div>
-                          <div className="text-sm font-semibold">{activity.market}</div>
-                          <div className="text-xs text-gray-500">
-                            {activity.action} {activity.shares} shares @ {activity.price}
- main
                           </div>
                         </div>
                         <div className="text-xs text-gray-400 font-mono">
-                          {new Date(activity.timestamp).toLocaleTimeString()}
+                          {activity.timestamp ? new Date(activity.timestamp).toLocaleTimeString() : '--:--'}
                         </div>
                       </div>
- dashboard-page-crash
                     ))
                   )}
-
-                      <div className="text-xs text-gray-400 font-mono">
-                        {activity.timestamp ? new Date(activity.timestamp).toLocaleTimeString() : '--:--'}
-                      </div>
-                    </div>
-                  ))}
- main
                 </div>
               </Card>
             </div>
