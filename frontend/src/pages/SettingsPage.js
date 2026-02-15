@@ -31,9 +31,17 @@ export default function SettingsPage() {
       });
   }
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(function () {
-    checkConnectionStatus();
+    axios.get(API + '/trading/status')
+      .then(function (res) {
+        setIsConnected(res.data.connected);
+        if (res.data.address) {
+          setProxyAddress(res.data.address);
+        }
+      })
+      .catch(function (err) {
+        console.error('Error checking connection:', err);
+      });
   }, []);
 
   const connectAccount = async () => {

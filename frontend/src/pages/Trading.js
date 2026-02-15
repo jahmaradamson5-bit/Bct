@@ -78,18 +78,41 @@ export default function Trading() {
 
   /* ---- Effects -------------------------------------------------------- */
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(function () { checkTradingStatus(); }, []);
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(function () {
+    axios
+      .get(API + '/trading/status')
+      .then(function (res) {
+        setIsConnected(res.data.connected);
+        setUserAddress(res.data.address || '');
+      })
+      .catch(function (err) {
+        console.error('Error checking trading status:', err);
+      });
+  }, []);
+
+  useEffect(function () {
+    function loadPositions() {
+      axios.get(API + '/trading/positions')
+        .then(function (res) { setPositions(Array.isArray(res.data) ? res.data : []); })
+        .catch(function (err) { console.error('Error fetching positions:', err); setPositions([]); });
+    }
+    function loadOrders() {
+      axios.get(API + '/trading/orders')
+        .then(function (res) { setOpenOrders(Array.isArray(res.data) ? res.data : []); })
+        .catch(function (err) { console.error('Error fetching orders:', err); setOpenOrders([]); });
+    }
+    function loadHistory() {
+      axios.get(API + '/trading/history?limit=50')
+        .then(function (res) { setTradeHistory(Array.isArray(res.data) ? res.data : []); })
+        .catch(function (err) { console.error('Error fetching trade history:', err); setTradeHistory([]); });
+    }
     if (isConnected) {
-      fetchPositions();
-      fetchOpenOrders();
-      fetchTradeHistory();
+      loadPositions();
+      loadOrders();
+      loadHistory();
       var interval = setInterval(function () {
-        fetchPositions();
-        fetchOpenOrders();
+        loadPositions();
+        loadOrders();
       }, 10000);
       return function () { clearInterval(interval); };
     }
