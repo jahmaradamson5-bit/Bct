@@ -77,12 +77,12 @@ export default function WalletTracker() {
 
     // Buy vs Sell comparison by market type
     const markets = {};
-    buyingPositions.forEach(pos => {
+    buyingPositions.forEach((pos) => {
       const marketType = pos.market?.split(' ')[0] || 'Other';
       if (!markets[marketType]) markets[marketType] = { name: marketType, buy: 0, sell: 0 };
       markets[marketType].buy += Math.abs(pos.current_value || 0);
     });
-    sellingPositions.forEach(pos => {
+    sellingPositions.forEach((pos) => {
       const marketType = pos.market?.split(' ')[0] || 'Other';
       if (!markets[marketType]) markets[marketType] = { name: marketType, buy: 0, sell: 0 };
       markets[marketType].sell += Math.abs(pos.current_value || 0);
@@ -91,9 +91,9 @@ export default function WalletTracker() {
 
     // Performance metrics
     const totalPositions = walletDetails.total_positions || 0;
-    const winningPositions = allPositions.filter(p => (p.unrealized_pnl || 0) > 0).length;
-    const pnlValues = allPositions.map(p => p.unrealized_pnl || 0);
-    
+    const winningPositions = allPositions.filter((p) => (p.unrealized_pnl || 0) > 0).length;
+    const pnlValues = allPositions.map((p) => p.unrealized_pnl || 0);
+
     const metrics = {
       totalValue: walletDetails.total_value || 0,
       totalPnl: walletDetails.total_pnl || 0,
@@ -162,13 +162,13 @@ export default function WalletTracker() {
   const viewWalletDetails = async (wallet) => {
     setSelectedWallet(wallet);
     setLoading(true);
-    
+
     try {
       const [detailsRes, activityRes] = await Promise.all([
         axios.get(`${API}/wallets/${wallet.address}/detailed`),
         axios.get(`${API}/wallets/${wallet.address}/activity-feed`)
       ]);
-      
+
       setWalletDetails(detailsRes.data || null);
       setActivityFeed(toSafeArray(activityRes.data));
     } catch (error) {
@@ -412,7 +412,7 @@ export default function WalletTracker() {
                               <span className="text-gray-500">Value:</span> <span className="font-mono font-semibold">${pos.current_value ?? 0}</span>
                             </div>
                             <div>
-                              <span className="text-gray-500">PNL:</span> 
+                              <span className="text-gray-500">PNL:</span>
                               <span className={`font-mono font-semibold ml-1 ${(pos.unrealized_pnl ?? 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                                 {(pos.unrealized_pnl ?? 0) >= 0 ? '+' : ''}${pos.unrealized_pnl ?? 0} ({(pos.pnl_percent ?? 0) >= 0 ? '+' : ''}{pos.pnl_percent ?? 0}%)
                               </span>
@@ -449,7 +449,7 @@ export default function WalletTracker() {
                               <span className="text-gray-500">Value:</span> <span className="font-mono font-semibold">${Math.abs(pos.current_value ?? 0)}</span>
                             </div>
                             <div>
-                              <span className="text-gray-500">PNL:</span> 
+                              <span className="text-gray-500">PNL:</span>
                               <span className={`font-mono font-semibold ml-1 ${(pos.unrealized_pnl ?? 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                                 {(pos.unrealized_pnl ?? 0) >= 0 ? '+' : ''}${pos.unrealized_pnl ?? 0} ({(pos.pnl_percent ?? 0) >= 0 ? '+' : ''}{pos.pnl_percent ?? 0}%)
                               </span>

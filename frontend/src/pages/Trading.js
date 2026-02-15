@@ -39,6 +39,7 @@ export default function Trading() {
       setPositions(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error('Error fetching positions:', error);
+      setPositions([]);
     }
   }, []);
 
@@ -48,6 +49,7 @@ export default function Trading() {
       setOpenOrders(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error('Error fetching orders:', error);
+      setOpenOrders([]);
     }
   }, []);
 
@@ -57,6 +59,7 @@ export default function Trading() {
       setTradeHistory(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error('Error fetching trade history:', error);
+      setTradeHistory([]);
     }
   }, []);
 
@@ -77,6 +80,7 @@ export default function Trading() {
     }
   }, [isConnected, fetchPositions, fetchOpenOrders, fetchTradeHistory]);
 
+  // --- toggleAutoTrading is a self-contained handler; nothing else lives inside it ---
   const toggleAutoTrading = () => {
     if (!isConnected) {
       toast.error('Please connect your Polymarket account first');
@@ -86,7 +90,7 @@ export default function Trading() {
     toast.success(autoTradingEnabled ? 'Auto-trading disabled' : 'Auto-trading enabled');
   };
 
-  // Generate chart data for trading performance -- lives at component scope
+  // --- Chart data generator lives at component scope so the JSX can reference it ---
   const generateTradingChartData = () => {
     const safePositions = Array.isArray(positions) ? positions : [];
     const safeHistory = Array.isArray(tradeHistory) ? tradeHistory : [];
@@ -123,6 +127,7 @@ export default function Trading() {
     return { pnlHistory, metrics };
   };
 
+  // --- Single declaration of tradingChartData at component scope ---
   const defaultMetrics = { totalValue: 0, totalPnl: 0, winRate: 0, avgReturn: 0, totalTrades: 0, bestTrade: 0, worstTrade: 0 };
   const tradingChartData = isConnected ? generateTradingChartData() : { pnlHistory: [], metrics: defaultMetrics };
 
