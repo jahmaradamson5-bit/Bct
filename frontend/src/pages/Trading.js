@@ -1,4 +1,3 @@
-/* Trading.js – v2 hard-reset rewrite – zero useCallback, single tradingChartData */
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Zap, TrendingUp, TrendingDown, Play, Pause, DollarSign, BarChart3 } from 'lucide-react';
@@ -26,100 +25,42 @@ export default function Trading() {
   var _e = useState([]), openOrders = _e[0], setOpenOrders = _e[1];
   var _f = useState([]), tradeHistory = _f[0], setTradeHistory = _f[1];
 
-  /* ---- Plain fetch functions (no useCallback) ------------------------- */
-
-  function checkTradingStatus() {
-    axios
-      .get(API + '/trading/status')
+  /* Initial load: check connection status */
+  useEffect(function () {
+    axios.get(API + '/trading/status')
       .then(function (res) {
         setIsConnected(res.data.connected);
         setUserAddress(res.data.address || '');
       })
-      .catch(function (err) {
-        console.error('Error checking trading status:', err);
-      });
-  }
+      .catch(function (err) { console.error('Error checking trading status:', err); });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  function fetchPositions() {
-    axios
-      .get(API + '/trading/positions')
-      .then(function (res) {
-        setPositions(Array.isArray(res.data) ? res.data : []);
-      })
-      .catch(function (err) {
-        console.error('Error fetching positions:', err);
-        setPositions([]);
-      });
-  }
-
-  function fetchOpenOrders() {
-    axios
-      .get(API + '/trading/orders')
-      .then(function (res) {
-        setOpenOrders(Array.isArray(res.data) ? res.data : []);
-      })
-      .catch(function (err) {
-        console.error('Error fetching orders:', err);
-        setOpenOrders([]);
-      });
-  }
-
-  function fetchTradeHistory() {
-    axios
-      .get(API + '/trading/history?limit=50')
-      .then(function (res) {
-        setTradeHistory(Array.isArray(res.data) ? res.data : []);
-      })
-      .catch(function (err) {
-        console.error('Error fetching trade history:', err);
-        setTradeHistory([]);
-      });
-  }
-
-  /* ---- Effects -------------------------------------------------------- */
-
+  /* Load positions, orders, history when connected */
   useEffect(function () {
-    axios
-      .get(API + '/trading/status')
-      .then(function (res) {
-        setIsConnected(res.data.connected);
-        setUserAddress(res.data.address || '');
-      })
-      .catch(function (err) {
-        console.error('Error checking trading status:', err);
-      });
-  }, []);
-
-  useEffect(function () {
+    if (!isConnected) return;
     function loadPositions() {
       axios.get(API + '/trading/positions')
         .then(function (res) { setPositions(Array.isArray(res.data) ? res.data : []); })
-        .catch(function (err) { console.error('Error fetching positions:', err); setPositions([]); });
+        .catch(function () { setPositions([]); });
     }
     function loadOrders() {
       axios.get(API + '/trading/orders')
         .then(function (res) { setOpenOrders(Array.isArray(res.data) ? res.data : []); })
-        .catch(function (err) { console.error('Error fetching orders:', err); setOpenOrders([]); });
+        .catch(function () { setOpenOrders([]); });
     }
     function loadHistory() {
       axios.get(API + '/trading/history?limit=50')
         .then(function (res) { setTradeHistory(Array.isArray(res.data) ? res.data : []); })
-        .catch(function (err) { console.error('Error fetching trade history:', err); setTradeHistory([]); });
+        .catch(function () { setTradeHistory([]); });
     }
-    if (isConnected) {
-      loadPositions();
-      loadOrders();
-      loadHistory();
-      var interval = setInterval(function () {
-        loadPositions();
-        loadOrders();
-      }, 10000);
-      return function () { clearInterval(interval); };
-    }
+    loadPositions();
+    loadOrders();
+    loadHistory();
+    var interval = setInterval(function () { loadPositions(); loadOrders(); }, 10000);
+    return function () { clearInterval(interval); };
   }, [isConnected]);
 
-  /* ---- toggleAutoTrading ---------------------------------------------- */
-
+  /* Toggle auto-trading */
   function toggleAutoTrading() {
     if (!isConnected) {
       toast.error('Please connect your Polymarket account first');
@@ -129,9 +70,9 @@ export default function Trading() {
     toast.success(autoTradingEnabled ? 'Auto-trading disabled' : 'Auto-trading enabled');
   }
 
-  /* ---- Chart data (single declaration) -------------------------------- */
-
+  /* Chart data generator — single declaration of tradingChartData */
   function generateTradingChartData() {
+    console.log("SIGNAL_ENGINE_STARTING");
     var safePositions = Array.isArray(positions) ? positions : [];
     var safeHistory = Array.isArray(tradeHistory) ? tradeHistory : [];
 
@@ -166,8 +107,7 @@ export default function Trading() {
     ? generateTradingChartData()
     : { pnlHistory: [], metrics: { totalValue: 0, totalPnl: 0, winRate: 0, avgReturn: 0, totalTrades: 0, bestTrade: 0, worstTrade: 0 } };
 
-  /* ---- Render --------------------------------------------------------- */
-
+  /* Render */
   return (
     <div className="max-w-7xl mx-auto px-6 py-6">
       {!isConnected ? (
@@ -178,18 +118,17 @@ export default function Trading() {
                 <Zap className="w-8 h-8 text-gray-400" />
               </div>
               <h2 className="text-2xl font-['Manrope'] font-bold mb-2">Connect Your Polymarket Account</h2>
-              <p className="text-gray-600 mb-6">To enable automated trading, you need to connect your Polymarket account. Go to Settings to configure your account credentials.</p>
+              <p className="text-gray-600 mb-6">To enable automated trading, connect your Polymarket account. Go to Settings to configure your credentials.</p>
               <Button onClick={function () { window.location.href = '/settings'; }} className="bg-black text-white hover:bg-gray-800 rounded-sm px-6 py-3">Go to Settings</Button>
             </div>
           </Card>
-
           <Card className="border-2 border-blue-500 shadow-lg rounded-sm">
             <div className="p-6 bg-blue-50 border-b border-blue-200">
               <div className="flex items-center gap-3 mb-2">
                 <BarChart3 className="w-6 h-6 text-blue-600" />
                 <h2 className="text-xl font-['Manrope'] font-bold">Preview: Auto-Trading Features</h2>
               </div>
-              <p className="text-sm text-blue-800">This is what you will see after connecting your account. Connect now to unlock automated trading!</p>
+              <p className="text-sm text-blue-800">This is what you will see after connecting your account.</p>
             </div>
             <div className="p-6 space-y-6">
               <div className="p-4 bg-gray-50 rounded-sm border-2 border-dashed border-gray-300">
@@ -217,19 +156,6 @@ export default function Trading() {
                   <div className="p-3 bg-white rounded-sm border"><div className="text-xs text-gray-500 mb-1">Total PNL</div><div className="text-xl font-bold text-green-600">+$156.23</div></div>
                   <div className="p-3 bg-white rounded-sm border"><div className="text-xs text-gray-500 mb-1">Win Rate</div><div className="text-xl font-bold">73.5%</div></div>
                   <div className="p-3 bg-white rounded-sm border"><div className="text-xs text-gray-500 mb-1">Avg Return</div><div className="text-xl font-bold text-green-600">+12.5%</div></div>
-                </div>
-              </div>
-              <div className="p-4 bg-gray-50 rounded-sm border-2 border-dashed border-gray-300">
-                <h3 className="text-sm font-['Manrope'] font-bold mb-3">Your Active Positions</h3>
-                <div className="space-y-2">
-                  <div className="p-3 bg-white rounded-sm border flex justify-between items-center">
-                    <div><div className="font-semibold text-sm">Bitcoin $100k by March</div><div className="text-xs text-gray-500">250 shares @ $0.68</div></div>
-                    <div className="text-right"><div className="text-sm font-bold text-green-600">+$24.50</div><div className="text-xs text-gray-500">$170.00</div></div>
-                  </div>
-                  <div className="p-3 bg-white rounded-sm border flex justify-between items-center">
-                    <div><div className="font-semibold text-sm">Ethereum $5k by Q2</div><div className="text-xs text-gray-500">180 shares @ $0.55</div></div>
-                    <div className="text-right"><div className="text-sm font-bold text-green-600">+$12.40</div><div className="text-xs text-gray-500">$99.00</div></div>
-                  </div>
                 </div>
               </div>
               <div className="p-4 bg-gray-50 rounded-sm border-2 border-dashed border-gray-300">
