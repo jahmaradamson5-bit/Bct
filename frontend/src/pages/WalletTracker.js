@@ -36,9 +36,7 @@ export default function WalletTracker() {
   var _f = useState(''), newWalletLabel = _f[0], setNewWalletLabel = _f[1];
   var _g = useState(false), loading = _g[0], setLoading = _g[1];
 
-  /* ------------------------------------------------------------------ */
-  /*  Chart data generator (component scope)                             */
-  /* ------------------------------------------------------------------ */
+  /* ---- Chart data generator (component scope) ---- */
   function generateChartData() {
     var emptyResult = { pnlHistory: [], distribution: [], buySell: [], metrics: {} };
     if (!walletDetails || typeof walletDetails !== 'object') return emptyResult;
@@ -108,18 +106,15 @@ export default function WalletTracker() {
 
   var chartData = generateChartData();
 
-  /* ------------------------------------------------------------------ */
-  /*  fetchWallets — plain function, NO useCallback                      */
-  /* ------------------------------------------------------------------ */
-  function fetchWallets() {
-    axios.get(API + '/wallets')
-      .then(function (response) {
-        setWallets(toSafeArray(response.data));
-      })
-      .catch(function (error) {
-        console.error('Error fetching wallets:', error);
-        setWallets([]);
-      });
+  /* ---- fetchWallets -- plain async function, NO useCallback ---- */
+  async function fetchWallets() {
+    try {
+      var response = await axios.get(API + '/wallets');
+      setWallets(toSafeArray(response.data));
+    } catch (error) {
+      console.error('Error fetching wallets:', error);
+      setWallets([]);
+    }
   }
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -182,9 +177,7 @@ export default function WalletTracker() {
       });
   }
 
-  /* ------------------------------------------------------------------ */
-  /*  Render                                                             */
-  /* ------------------------------------------------------------------ */
+  /* ---- Render ---- */
   return (
     <div className="max-w-7xl mx-auto px-6 py-6">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">

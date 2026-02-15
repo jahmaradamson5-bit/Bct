@@ -23,9 +23,7 @@ export default function Trading() {
   var _e = useState([]), openOrders = _e[0], setOpenOrders = _e[1];
   var _f = useState([]), tradeHistory = _f[0], setTradeHistory = _f[1];
 
-  /* ------------------------------------------------------------------ */
-  /*  Data fetching (plain functions – no useCallback needed)             */
-  /* ------------------------------------------------------------------ */
+  /* ---- Data fetching (plain functions, no hooks) ---- */
 
   async function checkTradingStatus() {
     try {
@@ -67,14 +65,14 @@ export default function Trading() {
     }
   }
 
-  /* ------------------------------------------------------------------ */
-  /*  Effects                                                            */
-  /* ------------------------------------------------------------------ */
+  /* ---- Effects ---- */
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(function () {
     checkTradingStatus();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(function () {
     if (isConnected) {
       fetchPositions();
@@ -86,11 +84,9 @@ export default function Trading() {
       }, 10000);
       return function () { clearInterval(interval); };
     }
-  }, [isConnected]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isConnected]);
 
-  /* ------------------------------------------------------------------ */
-  /*  toggleAutoTrading -- self-contained handler, nothing else inside   */
-  /* ------------------------------------------------------------------ */
+  /* ---- Toggle handler (self-contained) ---- */
 
   function toggleAutoTrading() {
     if (!isConnected) {
@@ -101,9 +97,7 @@ export default function Trading() {
     toast.success(autoTradingEnabled ? 'Auto-trading disabled' : 'Auto-trading enabled');
   }
 
-  /* ------------------------------------------------------------------ */
-  /*  Chart data generator (component scope, NOT inside any handler)     */
-  /* ------------------------------------------------------------------ */
+  /* ---- Chart data generator (component scope) ---- */
 
   function generateTradingChartData() {
     var safePositions = Array.isArray(positions) ? positions : [];
@@ -138,7 +132,7 @@ export default function Trading() {
     return { pnlHistory: pnlHistory, metrics: metrics };
   }
 
-  /* --- SINGLE declaration ------------------------------------------- */
+  /* ---- SINGLE declaration of tradingChartData ---- */
   var defaultMetrics = {
     totalValue: 0, totalPnl: 0, winRate: 0,
     avgReturn: 0, totalTrades: 0, bestTrade: 0, worstTrade: 0
@@ -147,9 +141,7 @@ export default function Trading() {
     ? generateTradingChartData()
     : { pnlHistory: [], metrics: defaultMetrics };
 
-  /* ------------------------------------------------------------------ */
-  /*  Render                                                             */
-  /* ------------------------------------------------------------------ */
+  /* ---- Render ---- */
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-6">
