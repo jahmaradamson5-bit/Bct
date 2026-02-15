@@ -1,4 +1,4 @@
-/* WalletTracker.js – clean rewrite – no useCallback, plain functions */
+/* WalletTracker.js – v2 hard-reset rewrite – zero useCallback, plain functions */
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
