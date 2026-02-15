@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Settings as SettingsIcon, Key, Save, CheckCircle } from 'lucide-react';
 import { Button } from '../components/ui/button';
@@ -18,21 +18,23 @@ export default function SettingsPage() {
   const [isConnected, setIsConnected] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const checkConnectionStatus = useCallback(async () => {
-    try {
-      const response = await axios.get(`${API}/trading/status`);
-      setIsConnected(response.data.connected);
-      if (response.data.address) {
-        setProxyAddress(response.data.address);
-      }
-    } catch (error) {
-      console.error('Error checking connection:', error);
-    }
-  }, [setIsConnected, setProxyAddress]);
+  function checkConnectionStatus() {
+    axios.get(API + '/trading/status')
+      .then(function (res) {
+        setIsConnected(res.data.connected);
+        if (res.data.address) {
+          setProxyAddress(res.data.address);
+        }
+      })
+      .catch(function (err) {
+        console.error('Error checking connection:', err);
+      });
+  }
 
-  useEffect(() => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(function () {
     checkConnectionStatus();
-  }, [checkConnectionStatus]);
+  }, []);
 
   const connectAccount = async () => {
     if (!privateKey || !proxyAddress) {

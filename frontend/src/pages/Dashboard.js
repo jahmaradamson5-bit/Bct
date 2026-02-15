@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import io from 'socket.io-client';
 import { Activity, Zap, Wallet, ArrowUpRight, ArrowDownRight, Brain, Plus, Trash2, TrendingUp, TrendingDown } from 'lucide-react';
@@ -80,44 +80,48 @@ export default function Dashboard() {
     };
   }, [binancePrice, prevBinancePrice]);
 
-  const fetchCurrentPrices = useCallback(async () => {
-    try {
-      const response = await axios.get(`${API}/prices/current`);
-      const data = response.data || {};
-      setBinancePrice(data.binance_price ?? null);
-      setPolymarketPrice(data.polymarket_price ?? null);
-      setPriceDelta(data.price_delta ?? 0);
-    } catch (error) {
-      console.error('Error fetching prices:', error);
-    }
-  }, [setBinancePrice, setPolymarketPrice, setPriceDelta]);
+  function fetchCurrentPrices() {
+    axios.get(API + '/prices/current')
+      .then(function (res) {
+        var data = res.data || {};
+        setBinancePrice(data.binance_price != null ? data.binance_price : null);
+        setPolymarketPrice(data.polymarket_price != null ? data.polymarket_price : null);
+        setPriceDelta(data.price_delta != null ? data.price_delta : 0);
+      })
+      .catch(function (err) {
+        console.error('Error fetching prices:', err);
+      });
+  }
 
-  const fetchWallets = useCallback(async () => {
-    try {
-      const response = await axios.get(`${API}/wallets`);
-      setWallets(toSafeArray(response.data));
-    } catch (error) {
-      console.error('Error fetching wallets:', error);
-      setWallets([]);
-    }
-  }, [setWallets]);
+  function fetchWallets() {
+    axios.get(API + '/wallets')
+      .then(function (res) {
+        setWallets(toSafeArray(res.data));
+      })
+      .catch(function (err) {
+        console.error('Error fetching wallets:', err);
+        setWallets([]);
+      });
+  }
 
-  const fetchSignals = useCallback(async () => {
-    try {
-      const response = await axios.get(`${API}/signals`);
-      setSignals(toSafeArray(response.data));
-    } catch (error) {
-      console.error('Error fetching signals:', error);
-      setSignals([]);
-    }
-  }, [setSignals]);
+  function fetchSignals() {
+    axios.get(API + '/signals')
+      .then(function (res) {
+        setSignals(toSafeArray(res.data));
+      })
+      .catch(function (err) {
+        console.error('Error fetching signals:', err);
+        setSignals([]);
+      });
+  }
 
   // Fetch initial data
-  useEffect(() => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(function () {
     fetchCurrentPrices();
     fetchWallets();
     fetchSignals();
-  }, [fetchCurrentPrices, fetchWallets, fetchSignals]);
+  }, []);
 
   const addWallet = async () => {
     if (!newWalletAddress || !newWalletLabel) {
