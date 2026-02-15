@@ -30,18 +30,18 @@ export default function BuySellComparison({ data }) {
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={safeData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-          <XAxis 
-            dataKey="name" 
+          <XAxis
+            dataKey="name"
             tick={{ fontSize: 11, fill: '#6B7280' }}
             stroke="#D1D5DB"
           />
-          <YAxis 
+          <YAxis
             tick={{ fontSize: 11, fill: '#6B7280' }}
             stroke="#D1D5DB"
             tickFormatter={(value) => `$${value}`}
           />
           <Tooltip content={<CustomTooltip />} />
-          <Legend 
+          <Legend
             wrapperStyle={{ fontSize: '12px' }}
             iconType="circle"
           />

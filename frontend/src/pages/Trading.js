@@ -39,6 +39,7 @@ export default function Trading() {
       setPositions(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error('Error fetching positions:', error);
+      setPositions([]);
     }
   }, []);
 
@@ -48,6 +49,7 @@ export default function Trading() {
       setOpenOrders(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error('Error fetching orders:', error);
+      setOpenOrders([]);
     }
   }, []);
 
@@ -57,6 +59,7 @@ export default function Trading() {
       setTradeHistory(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error('Error fetching trade history:', error);
+      setTradeHistory([]);
     }
   }, []);
 
@@ -77,6 +80,7 @@ export default function Trading() {
     }
   }, [isConnected, fetchPositions, fetchOpenOrders, fetchTradeHistory]);
 
+  // toggleAutoTrading is a self-contained handler
   const toggleAutoTrading = () => {
     if (!isConnected) {
       toast.error('Please connect your Polymarket account first');
@@ -86,12 +90,11 @@ export default function Trading() {
     toast.success(autoTradingEnabled ? 'Auto-trading disabled' : 'Auto-trading enabled');
   };
 
-  // Generate chart data for trading performance -- lives at component scope
+  // Chart data generator at component scope so JSX can reference it
   const generateTradingChartData = () => {
     const safePositions = Array.isArray(positions) ? positions : [];
     const safeHistory = Array.isArray(tradeHistory) ? tradeHistory : [];
 
-    // Simulated PNL history based on trade history
     const pnlHistory = [];
     let cumulativePnl = 0;
 
@@ -104,7 +107,6 @@ export default function Trading() {
       });
     }
 
-    // Calculate metrics from positions and trades
     const totalValue = safePositions.reduce((sum, p) => sum + (p.currentValue || 0), 0);
     const totalPnl = safePositions.reduce((sum, p) => sum + (p.pnl || 0), 0);
     const winningTrades = safeHistory.filter(t => t.pnl && t.pnl > 0).length;
@@ -123,6 +125,7 @@ export default function Trading() {
     return { pnlHistory, metrics };
   };
 
+  // Single declaration of tradingChartData at component scope
   const defaultMetrics = { totalValue: 0, totalPnl: 0, winRate: 0, avgReturn: 0, totalTrades: 0, bestTrade: 0, worstTrade: 0 };
   const tradingChartData = isConnected ? generateTradingChartData() : { pnlHistory: [], metrics: defaultMetrics };
 
