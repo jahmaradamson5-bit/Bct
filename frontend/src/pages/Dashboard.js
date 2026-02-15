@@ -115,12 +115,24 @@ export default function Dashboard() {
       });
   }
 
-  // Fetch initial data
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // Fetch initial data -- inline to avoid exhaustive-deps lint error
   useEffect(function () {
-    fetchCurrentPrices();
-    fetchWallets();
-    fetchSignals();
+    axios.get(API + '/prices/current')
+      .then(function (res) {
+        var data = res.data || {};
+        setBinancePrice(data.binance_price != null ? data.binance_price : null);
+        setPolymarketPrice(data.polymarket_price != null ? data.polymarket_price : null);
+        setPriceDelta(data.price_delta != null ? data.price_delta : 0);
+      })
+      .catch(function (err) { console.error('Error fetching prices:', err); });
+
+    axios.get(API + '/wallets')
+      .then(function (res) { setWallets(toSafeArray(res.data)); })
+      .catch(function (err) { console.error('Error fetching wallets:', err); setWallets([]); });
+
+    axios.get(API + '/signals')
+      .then(function (res) { setSignals(toSafeArray(res.data)); })
+      .catch(function (err) { console.error('Error fetching signals:', err); setSignals([]); });
   }, []);
 
   const addWallet = async () => {

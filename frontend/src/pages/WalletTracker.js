@@ -1,4 +1,4 @@
-/* WalletTracker.js – clean rewrite – no useCallback, plain functions */
+/* WalletTracker.js – v2 hard-reset rewrite – zero useCallback, plain functions */
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
@@ -141,11 +141,18 @@ export default function WalletTracker() {
     }, 1000);
   }
 
-  /* ---- Effects (no dependency array issues) --------------------------- */
+  /* ---- Initial data load ----------------------------------------------- */
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(function () {
-    fetchWallets();
+    axios
+      .get(API + '/wallets')
+      .then(function (res) {
+        setWallets(toSafeArray(res.data));
+      })
+      .catch(function (err) {
+        console.error('Error fetching wallets:', err);
+        setWallets([]);
+      });
   }, []);
 
   /* ---- CRUD handlers -------------------------------------------------- */
