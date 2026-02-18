@@ -72,7 +72,7 @@ export default function Trading() {
 
   /* Chart data generator — single declaration of tradingChartData */
   function generateTradingChartData() {
-    console.log("SIGNAL_ENGINE_STARTING");
+    console.log("RELOADING_SIGNAL_ENGINE_v2");
     var safePositions = Array.isArray(positions) ? positions : [];
     var safeHistory = Array.isArray(tradeHistory) ? tradeHistory : [];
 
