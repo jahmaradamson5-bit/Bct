@@ -7,9 +7,10 @@ import { Label } from '../components/ui/label';
 import { Card } from '../components/ui/card';
 import { toast } from 'sonner';
 
+const DEFAULT_BACKEND = 'https://btc-signal-engine-1.emergent.host';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL && process.env.REACT_APP_BACKEND_URL !== 'undefined'
   ? process.env.REACT_APP_BACKEND_URL.replace(/\/+$/, '')
-  : '';
+  : DEFAULT_BACKEND;
 const API = `${BACKEND_URL}/api`;
 
 export default function SettingsPage() {

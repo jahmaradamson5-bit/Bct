@@ -10,11 +10,12 @@ import { toast } from 'sonner';
 import PnLChart from '../components/charts/PnLChart';
 import PerformanceMetrics from '../components/charts/PerformanceMetrics';
 
+var DEFAULT_BACKEND = 'https://btc-signal-engine-1.emergent.host';
 var BACKEND_URL =
   process.env.REACT_APP_BACKEND_URL &&
   process.env.REACT_APP_BACKEND_URL !== 'undefined'
     ? process.env.REACT_APP_BACKEND_URL.replace(/\/+$/, '')
-    : '';
+    : DEFAULT_BACKEND;
 var API = BACKEND_URL + '/api';
 
 export default function Trading() {
