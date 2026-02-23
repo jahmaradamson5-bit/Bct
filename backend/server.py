@@ -329,10 +329,13 @@ async def get_wallet_activity_feed(address: str, limit: int = 50):
 # Include the router in the main app
 app.include_router(api_router)
 
+_cors_env = os.environ.get('CORS_ORIGINS', '*').strip()
+_cors_origins = ["*"] if _cors_env == "*" else [o.strip() for o in _cors_env.split(',') if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
+    allow_credentials=False if "*" in _cors_origins else True,
+    allow_origins=_cors_origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )
