@@ -339,8 +339,7 @@ async def get_wallet_activity_feed(address: str, limit: int = 50):
     
     return await wallet_tracking_service.get_wallet_activity_feed(address, limit)
 
-# CORS — must be added BEFORE including routers and wrapping with Socket.IO
-# so that preflight OPTIONS requests are handled correctly
+# CORS — middleware + explicit response headers to survive Socket.IO ASGI wrapping
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=False,
@@ -349,6 +348,21 @@ app.add_middleware(
     allow_headers=["*"],
     expose_headers=["*"],
 )
+
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request as StarletteRequest
+
+class ForceCORSMiddleware(BaseHTTPMiddleware):
+    """Belt-and-suspenders: inject CORS headers on every response so they
+    survive even when socketio.ASGIApp proxies the request."""
+    async def dispatch(self, request: StarletteRequest, call_next):
+        response = await call_next(request)
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+        response.headers["Access-Control-Allow-Headers"] = "*"
+        return response
+
+app.add_middleware(ForceCORSMiddleware)
 
 # Include the router in the main app
 app.include_router(api_router)
