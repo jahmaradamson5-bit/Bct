@@ -158,7 +158,20 @@ async def get_current_prices():
         "timestamp": datetime.now(timezone.utc).isoformat()
     }
 
-# Signals
+# Signals — explicit OPTIONS handler so CORS preflight never returns 404
+@api_router.options("/signals")
+@api_router.options("/signals/generate")
+async def signals_preflight():
+    from starlette.responses import Response
+    return Response(
+        status_code=204,
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+            "Access-Control-Allow-Headers": "*",
+        },
+    )
+
 @api_router.get("/signals", response_model=List[Signal])
 async def get_signals(limit: int = 20):
     signals = await db.signals.find({}, {"_id": 0}).sort("timestamp", -1).to_list(limit)
@@ -326,19 +339,19 @@ async def get_wallet_activity_feed(address: str, limit: int = 50):
     
     return await wallet_tracking_service.get_wallet_activity_feed(address, limit)
 
-# Include the router in the main app
-app.include_router(api_router)
-
-_cors_env = os.environ.get('CORS_ORIGINS', '*').strip()
-_cors_origins = ["*"] if _cors_env == "*" else [o.strip() for o in _cors_env.split(',') if o.strip()]
-
+# CORS — must be added BEFORE including routers and wrapping with Socket.IO
+# so that preflight OPTIONS requests are handled correctly
 app.add_middleware(
     CORSMiddleware,
-    allow_credentials=False if "*" in _cors_origins else True,
-    allow_origins=_cors_origins,
+    allow_credentials=False,
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
+
+# Include the router in the main app
+app.include_router(api_router)
 
 # Configure logging
 logging.basicConfig(
